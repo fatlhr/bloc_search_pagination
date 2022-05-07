@@ -14,12 +14,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  //bool isLoading = true;
-
   @override
   void initState() {
     super.initState();
-    //searchResult = "fatih";
+    searchResult = "sejutacita";
   }
 
   dynamic selectedValue = 1;
@@ -41,26 +39,23 @@ class _HomePageState extends State<HomePage> {
               centerTitle: true,
               //toolbarHeight: 200,
               title: TextField(
-                  enabled: true,
-                  decoration: InputDecoration(
-                    hintText: 'Search for something',
-                    suffixIcon: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          searchResult = searchController.text;
-                          print(searchResult);
-                        });
-                      },
-                      icon: Icon(Icons.search, color: Colors.grey),
-                    ),
-                    fillColor: Colors.white,
-                    filled: true,
+                enabled: true,
+                decoration: InputDecoration(
+                  hintText: 'sejutacita',
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        searchResult = searchController.text;
+                      });
+                    },
+                    icon: Icon(Icons.search, color: Colors.grey),
                   ),
-                  autofocus: true,
-                  controller: searchController,
-                  onChanged: (value) {
-                    searchResult = value;
-                  }),
+                  fillColor: Colors.white,
+                  filled: true,
+                ),
+                autofocus: true,
+                controller: searchController,
+              ),
               bottom: PreferredSize(
                 preferredSize: Size(
                   MediaQuery.of(context).size.width,
@@ -73,22 +68,20 @@ class _HomePageState extends State<HomePage> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
                           child: SizedBox(
                             width: MediaQuery.of(context).size.width,
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Flexible(
-                                  flex: 1,
-                                  child: ListTile(
-                                    contentPadding: EdgeInsets.all(0),
-                                    horizontalTitleGap: 0,
-                                    leading: Radio(
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Radio(
                                       value: 1,
                                       groupValue: selectedValue,
                                       onChanged: (value) {
@@ -97,22 +90,19 @@ class _HomePageState extends State<HomePage> {
                                         });
                                       },
                                     ),
-                                    title: Text(
+                                    Text(
                                       'User',
                                       maxLines: 1,
                                       style: TextStyle(
-                                        fontSize: ScreenUtil().setSp(16),
+                                        fontSize: ScreenUtil().setSp(14),
                                         color: Colors.white,
                                       ),
                                     ),
-                                  ),
+                                  ],
                                 ),
-                                Flexible(
-                                  flex: 1,
-                                  child: ListTile(
-                                    contentPadding: EdgeInsets.all(0),
-                                    horizontalTitleGap: 0,
-                                    leading: Radio(
+                                Row(
+                                  children: [
+                                    Radio(
                                       value: 2,
                                       groupValue: selectedValue,
                                       onChanged: (value) {
@@ -121,22 +111,20 @@ class _HomePageState extends State<HomePage> {
                                         });
                                       },
                                     ),
-                                    title: Text(
+                                    Text(
                                       'issues',
                                       maxLines: 1,
                                       style: TextStyle(
-                                        fontSize: ScreenUtil().setSp(16),
+                                        fontSize: ScreenUtil().setSp(14),
                                         color: Colors.white,
                                       ),
                                     ),
-                                  ),
+                                  ],
                                 ),
-                                Flexible(
-                                  flex: 1,
-                                  child: ListTile(
-                                    contentPadding: EdgeInsets.all(0),
-                                    horizontalTitleGap: 0,
-                                    leading: Radio(
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Radio(
                                       value: 3,
                                       groupValue: selectedValue,
                                       onChanged: (value) {
@@ -145,16 +133,17 @@ class _HomePageState extends State<HomePage> {
                                         });
                                       },
                                     ),
-                                    title: Text(
+                                    Text(
                                       'Repositories',
                                       maxLines: 1,
                                       style: TextStyle(
-                                        fontSize: ScreenUtil().setSp(16),
+                                        fontSize: ScreenUtil().setSp(14),
                                         color: Colors.white,
                                       ),
                                     ),
-                                  ),
+                                  ],
                                 ),
+                                //Expanded(child: Container()),
                               ],
                             ),
                           ),
@@ -218,8 +207,10 @@ class _HomePageState extends State<HomePage> {
                   switch (snapshot.connectionState) {
                     case ConnectionState.waiting:
                       return SizedBox(
-                        height: MediaQuery.of(context).size.height,
-                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height -
+                            (kToolbarHeight * 2),
+                        width: MediaQuery.of(context).size.width -
+                            (kToolbarHeight * 2),
                         child: const Center(
                           child: CircularProgressIndicator(),
                         ),
@@ -241,28 +232,33 @@ class _HomePageState extends State<HomePage> {
                                   ? data[1].length
                                   : data[2].length,
                           itemBuilder: (context, index) {
-                            return selectedValue == 1
-                                ? buildUserWidget(
-                                    data[0][index].avatarUrl,
-                                    data[0][index].login,
-                                    data[0][index].htmlUrl,
-                                  )
-                                : selectedValue == 2
-                                    ? buildIssuesWidget(
-                                        data[1][index].user.avatarUrl,
-                                        data[1][index].title,
-                                        data[1][index].updatedAt,
-                                        data[1][index].htmlUrl,
-                                        data[1][index].state,
+                            return searchResult == ""
+                                ? buildNullWidget()
+                                : selectedValue == 1 && data[0].length > 0
+                                    ? buildUserWidget(
+                                        data[0][index].avatarUrl,
+                                        data[0][index].login,
+                                        data[0][index].htmlUrl,
                                       )
-                                    : buildRepoWidget(
-                                        data[2][index].owner.avatarUrl,
-                                        data[2][index].name,
-                                        data[2][index].watchersCount,
-                                        data[2][index].createdAt,
-                                        data[2][index].stargazersCount,
-                                        data[2][index].forks,
-                                      );
+                                    : selectedValue == 2 && data[1].length > 0
+                                        ? buildIssuesWidget(
+                                            data[1][index].user.avatarUrl,
+                                            data[1][index].title,
+                                            data[1][index].updatedAt,
+                                            data[1][index].htmlUrl,
+                                            data[1][index].state,
+                                          )
+                                        : selectedValue == 3 &&
+                                                data[2].length > 0
+                                            ? buildRepoWidget(
+                                                data[2][index].owner.avatarUrl,
+                                                data[2][index].name,
+                                                data[2][index].watchersCount,
+                                                data[2][index].createdAt,
+                                                data[2][index].stargazersCount,
+                                                data[2][index].forks,
+                                              )
+                                            : buildNullWidget();
                           },
                         );
                       }
@@ -271,6 +267,22 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildNullWidget() {
+    return SizedBox(
+      height: MediaQuery.of(context).size.height - (kToolbarHeight * 2),
+      width: MediaQuery.of(context).size.width - 48,
+      child: Center(
+        child: Text(
+          'No Data, please search something else...',
+          style: TextStyle(
+            fontSize: ScreenUtil().setSp(14),
+            color: Colors.black,
+          ),
         ),
       ),
     );
