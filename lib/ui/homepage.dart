@@ -2,6 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../services/service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -11,7 +14,18 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  dynamic selectedValue = 0;
+  //bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    //searchResult = "fatih";
+  }
+
+  dynamic selectedValue = 1;
+
+  TextEditingController searchController = TextEditingController();
+  String searchResult = "";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,14 +41,26 @@ class _HomePageState extends State<HomePage> {
               centerTitle: true,
               //toolbarHeight: 200,
               title: TextField(
-                enabled: true,
-                decoration: InputDecoration(
-                  hintText: 'Search for something',
-                  suffixIcon: Icon(Icons.search),
-                  fillColor: Colors.white,
-                  filled: true,
-                ),
-              ),
+                  enabled: true,
+                  decoration: InputDecoration(
+                    hintText: 'Search for something',
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          searchResult = searchController.text;
+                          print(searchResult);
+                        });
+                      },
+                      icon: Icon(Icons.search, color: Colors.grey),
+                    ),
+                    fillColor: Colors.white,
+                    filled: true,
+                  ),
+                  autofocus: true,
+                  controller: searchController,
+                  onChanged: (value) {
+                    searchResult = value;
+                  }),
               bottom: PreferredSize(
                 preferredSize: Size(
                   MediaQuery.of(context).size.width,
@@ -181,16 +207,67 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  return selectedValue == 1
-                      ? buildUserWidget()
-                      : selectedValue == 2
-                          ? buildIssuesWidget()
-                          : buildRepoWidget();
+            SliverToBoxAdapter(
+              child: FutureBuilder(
+                future: Future.wait([
+                  Service.getUser(searchResult, 1, 5),
+                  Service.getIssues(searchResult, 1, 5),
+                  Service.getRepo(searchResult, 1, 5),
+                ]),
+                builder: (context, snapshot) {
+                  switch (snapshot.connectionState) {
+                    case ConnectionState.waiting:
+                      return SizedBox(
+                        height: MediaQuery.of(context).size.height,
+                        width: MediaQuery.of(context).size.width,
+                        child: const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+
+                    default:
+                      if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      } else if (snapshot.data == null) {
+                        return const Center(child: Text('No data found'));
+                      } else {
+                        var data = snapshot.data! as List;
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: selectedValue == 1
+                              ? data[0].length
+                              : selectedValue == 2
+                                  ? data[1].length
+                                  : data[2].length,
+                          itemBuilder: (context, index) {
+                            return selectedValue == 1
+                                ? buildUserWidget(
+                                    data[0][index].avatarUrl,
+                                    data[0][index].login,
+                                    data[0][index].htmlUrl,
+                                  )
+                                : selectedValue == 2
+                                    ? buildIssuesWidget(
+                                        data[1][index].user.avatarUrl,
+                                        data[1][index].title,
+                                        data[1][index].updatedAt,
+                                        data[1][index].htmlUrl,
+                                        data[1][index].state,
+                                      )
+                                    : buildRepoWidget(
+                                        data[2][index].owner.avatarUrl,
+                                        data[2][index].name,
+                                        data[2][index].watchersCount,
+                                        data[2][index].createdAt,
+                                        data[2][index].stargazersCount,
+                                        data[2][index].forks,
+                                      );
+                          },
+                        );
+                      }
+                  }
                 },
-                childCount: 20,
               ),
             ),
           ],
@@ -199,17 +276,64 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  ListTile buildRepoWidget() {
+  Widget buildUserWidget(
+    String avatar,
+    String username,
+    String urlProfile,
+  ) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 8),
+      child: ListTile(
+        leading: ConstrainedBox(
+          constraints: BoxConstraints.tightFor(
+            width: kToolbarHeight - 10,
+            height: kToolbarHeight - 10,
+          ),
+          child: InkWell(
+              onTap: () async {
+                var url = urlProfile;
+
+                if (await canLaunchUrl(Uri.parse(url))) {
+                  await launchUrl(Uri.parse(url));
+                } else {
+                  throw 'Could not launch $url';
+                }
+              },
+              child: Image.network(avatar)),
+        ),
+        title: Text(
+          username,
+          maxLines: 1,
+          style: TextStyle(
+            fontSize: ScreenUtil().setSp(18),
+            color: Colors.black,
+          ),
+        ),
+      ),
+    );
+  }
+
+  ListTile buildRepoWidget(
+    String avatar,
+    String title,
+    int totalWatchers,
+    String createdDate,
+    int totalStars,
+    int totalForks,
+  ) {
     return ListTile(
       leading: ConstrainedBox(
         constraints: BoxConstraints.tightFor(
           width: kToolbarHeight - 10,
           height: kToolbarHeight - 10,
         ),
-        child: Image.asset('assets/images/pic.jpg'),
+        child: Image.network(
+          avatar,
+          fit: BoxFit.contain,
+        ),
       ),
       title: Text(
-        'Repo Title',
+        title,
         maxLines: 1,
         style: TextStyle(
           fontSize: ScreenUtil().setSp(16),
@@ -217,7 +341,7 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       subtitle: Text(
-        'Created Date',
+        'Created At: ' + createdDate,
         maxLines: 1,
         style: TextStyle(
           fontSize: ScreenUtil().setSp(12),
@@ -225,10 +349,10 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       trailing: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            'Total Watchers',
+            'Total Watchers: ' + totalWatchers.toString(),
             maxLines: 1,
             style: TextStyle(
               fontSize: ScreenUtil().setSp(10),
@@ -236,7 +360,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           Text(
-            'Total Stars',
+            'Total Stars: ' + totalStars.toString(),
             maxLines: 1,
             style: TextStyle(
               fontSize: ScreenUtil().setSp(10),
@@ -244,7 +368,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           Text(
-            'Total Forks',
+            'Total Forks: ' + totalForks.toString(),
             maxLines: 1,
             style: TextStyle(
               fontSize: ScreenUtil().setSp(10),
@@ -256,40 +380,23 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget buildUserWidget() {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 8),
-      child: ListTile(
-        leading: ConstrainedBox(
-          constraints: BoxConstraints.tightFor(
-            width: kToolbarHeight - 10,
-            height: kToolbarHeight - 10,
-          ),
-          child: Image.asset('assets/images/pic.jpg'),
-        ),
-        title: Text(
-          'Username',
-          maxLines: 1,
-          style: TextStyle(
-            fontSize: ScreenUtil().setSp(18),
-            color: Colors.black,
-          ),
-        ),
-      ),
-    );
-  }
-
-  ListTile buildIssuesWidget() {
+  ListTile buildIssuesWidget(
+    String avatar,
+    String title,
+    String updatedDate,
+    String issues,
+    String state,
+  ) {
     return ListTile(
       leading: ConstrainedBox(
         constraints: BoxConstraints.tightFor(
           width: kToolbarHeight - 10,
           height: kToolbarHeight - 10,
         ),
-        child: Image.asset('assets/images/pic.jpg'),
+        child: Image.network(avatar, fit: BoxFit.contain),
       ),
       title: Text(
-        'Issues Title',
+        title,
         maxLines: 1,
         style: TextStyle(
           fontSize: ScreenUtil().setSp(16),
@@ -297,7 +404,7 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       subtitle: Text(
-        'Update dates',
+        updatedDate,
         maxLines: 1,
         style: TextStyle(
           fontSize: ScreenUtil().setSp(12),
@@ -306,16 +413,27 @@ class _HomePageState extends State<HomePage> {
       ),
       trailing: Column(
         children: [
-          Text(
-            'Issues',
-            maxLines: 1,
-            style: TextStyle(
-              fontSize: ScreenUtil().setSp(12),
-              color: Colors.grey,
+          InkWell(
+            onTap: () async {
+              var url = issues;
+
+              if (await canLaunchUrl(Uri.parse(issues))) {
+                await launchUrl(Uri.parse(issues));
+              } else {
+                throw 'Could not launch $url';
+              }
+            },
+            child: Text(
+              'Issues',
+              maxLines: 1,
+              style: TextStyle(
+                fontSize: ScreenUtil().setSp(12),
+                color: Colors.blueAccent,
+              ),
             ),
           ),
           Text(
-            'Dates',
+            state,
             maxLines: 1,
             style: TextStyle(
               fontSize: ScreenUtil().setSp(12),

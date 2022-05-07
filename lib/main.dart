@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
             secondary: const Color(0xFFffc500),
           ),
           scaffoldBackgroundColor: const Color(0xFFffffff),
-          textTheme: GoogleFonts.oswaldTextTheme(
+          textTheme: GoogleFonts.poppinsTextTheme(
             Theme.of(context).textTheme,
           ),
         ),

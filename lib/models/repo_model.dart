@@ -89,7 +89,6 @@ class RepoItems {
     required this.hasWiki,
     required this.hasPages,
     required this.forksCount,
-    this.mirrorUrl,
     required this.archived,
     required this.disabled,
     required this.openIssuesCount,
@@ -168,7 +167,6 @@ class RepoItems {
   late final bool hasWiki;
   late final bool hasPages;
   late final int forksCount;
-  late final Null mirrorUrl;
   late final bool archived;
   late final bool disabled;
   late final int openIssuesCount;
@@ -248,7 +246,6 @@ class RepoItems {
     hasWiki = json['has_wiki'];
     hasPages = json['has_pages'];
     forksCount = json['forks_count'];
-    mirrorUrl = null;
     archived = json['archived'];
     disabled = json['disabled'];
     openIssuesCount = json['open_issues_count'];
@@ -330,7 +327,6 @@ class RepoItems {
     _data['has_wiki'] = hasWiki;
     _data['has_pages'] = hasPages;
     _data['forks_count'] = forksCount;
-    _data['mirror_url'] = mirrorUrl;
     _data['archived'] = archived;
     _data['disabled'] = disabled;
     _data['open_issues_count'] = openIssuesCount;

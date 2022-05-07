@@ -6,59 +6,52 @@ import '../models/repo_model.dart';
 import '../models/user_model.dart';
 
 class Service {
-  static Future<List<UserModelItems>> getUser() async {
-    String url = "https://api.github.com/search/users?q=doraemon";
-
+  static Future<List<UserItems>> getUser(String input, int page, int perPage) async {
+    String url = "https://api.github.com/search/users?q=$input&page=page&per_page=$perPage";
+        
     var res = await http.get(Uri.parse(url));
     if (res.statusCode == 200) {
-      var data = (jsonDecode(res.body))['items'];
-      var searchUser = List<UserModelItems>.from(
-          data.map((item) => UserModelItems.fromJson(item)));
-      print(searchUser);
-      return searchUser;
-    }
-    throw Exception('Failed to load');
+      var data = (jsonDecode(res.body))['items'] as List;
+      var searchUser = List<UserItems>.from(
+        data.map(
+          (item) => UserItems.fromJson(item),
+        ),
+      );
+      //print(searchUser[0].);
+      return Future.delayed(const Duration(seconds: 3))
+          .then((value) => searchUser);
+    }else if(res.statusCode == 403){
+      throw Exception('403 Forbidden');}
+    throw Exception('Failed to load' + res.statusCode.toString());
   }
 
-  // static Future<List<RepoModelItems>> getRepo() async {
-  //   String url = "https://api.github.com/search/repositories?q=doraemon";
-
-  //   var res = await http.get(Uri.parse(url));
-  //   if (res.statusCode == 200) {
-  //     var data = (jsonDecode(res.body))['items'];
-  //     var searchRepo = List<RepoModelItemsLicense>.from(
-  //         data.map((item) => RepoModelItemsLicense.fromJson(item)));
-  //     print(searchRepo);
-  //     return searchRepo;
-  //   }
-  //   throw Exception('Failed to load');
-  // }
-
-  static Future<List<RepoItems>> getRepoOwner() async {
-    String url = "https://api.github.com/search/repositories?q=doraemon";
+  static Future<List<RepoItems>> getRepo(String input, int page, int perPage) async {
+    String url = "https://api.github.com/search/repositories?q=$input&page=page&per_page=$perPage";
 
     var res = await http.get(Uri.parse(url));
     if (res.statusCode == 200) {
       var data = (jsonDecode(res.body))['items'];
-      var searchRepoOwner = List<RepoItems>.from(
-          data.map((item) => RepoItems.fromJson(item)));
-      //print(searchRepoOwner[0].owner.avatarUrl);
-      return searchRepoOwner;
+      var searchRepo =
+          List<RepoItems>.from(data.map((item) => RepoItems.fromJson(item)));
+      //print(searchRepo[0].name);
+      return Future.delayed(const Duration(seconds: 3))
+          .then((value) => searchRepo);
     }
-    throw Exception('Failed to load');
+    throw Exception('Failed to load ' + res.statusCode.toString());
   }
-  
-  static Future<List<IssuesItems>> getIssues() async {
-    String url = "https://api.github.com/search/issues?q=flutter";
+
+  static Future<List<IssuesItems>> getIssues(String input, int page, int perPage) async {
+    String url = "https://api.github.com/search/issues?q=$input&page=page&per_page=$perPage";
 
     var res = await http.get(Uri.parse(url));
     if (res.statusCode == 200) {
       var data = (jsonDecode(res.body))['items'];
-      var searchIssues =
-          List<IssuesItems>.from(data.map((item) => IssuesItems.fromJson(item)));
-      print(searchIssues[0].title);
-      return searchIssues;
+      var searchIssues = List<IssuesItems>.from(
+          data.map((item) => IssuesItems.fromJson(item)));
+      //print(searchIssues[0].);
+      return Future.delayed(const Duration(seconds: 3))
+          .then((value) => searchIssues);
     }
-    throw Exception('Failed to load');
+    throw Exception('Failed to load ' + res.statusCode.toString());
   }
 }
