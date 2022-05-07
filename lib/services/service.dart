@@ -4,13 +4,17 @@ import 'dart:convert';
 import '../models/issues_model.dart';
 import '../models/repo_model.dart';
 import '../models/user_model.dart';
+import '../utils/api.dart';
 
-class Service {
-  static Future<List<UserItems>> getUser(
+abstract class SearchResult {
+  Future<List<UserItems>> searchSomething(String searchResult);
+}
+
+class Service extends SearchResult {
+  static Future<List<UserItems>> getUsers(
       String input, int page, int perPage) async {
     String url =
-        "https://api.github.com/search/users?q=$input&page=page&per_page=$perPage";
-    //String url = "https://api.github.com/search/users?q=$input";
+        Api.api+"/search/users?q=$input&page=page&per_page=$perPage";
 
     var res = await http.get(Uri.parse(url));
     if (res.statusCode == 200) {
@@ -21,8 +25,7 @@ class Service {
         ),
       );
       //print(searchUser[0].);
-      return Future.delayed(const Duration(seconds: 6))
-          .then((value) => searchUser);
+      return searchUser;
     } else if (res.statusCode == 403) {
       throw Exception('403 Forbidden');
     }
@@ -31,9 +34,9 @@ class Service {
 
   static Future<List<RepoItems>> getRepo(
       String input, int page, int perPage) async {
-    String url = "https://api.github.com/search/repositories?q=$input";
-    // String url =
-    //     "https://api.github.com/search/repositories?q=$input&page=page&per_page=$perPage";
+    //String url = "https://api.github.com/search/repositories?q=$input";
+    String url =
+        "https://api.github.com/search/repositories?q=$input&page=page&per_page=$perPage";
 
     var res = await http.get(Uri.parse(url));
     if (res.statusCode == 200) {
@@ -49,9 +52,9 @@ class Service {
 
   static Future<List<IssuesItems>> getIssues(
       String input, int page, int perPage) async {
-    String url = "https://api.github.com/search/issues?q=$input";
-    // String url =
-    //     "https://api.github.com/search/issues?q=$input&page=page&per_page=$perPage";
+    //String url = "https://api.github.com/search/issues?q=$input";
+    String url =
+        "https://api.github.com/search/issues?q=$input&page=page&per_page=$perPage";
     var res = await http.get(Uri.parse(url));
     if (res.statusCode == 200) {
       var data = (jsonDecode(res.body))['items'];
@@ -62,5 +65,11 @@ class Service {
           .then((value) => searchIssues);
     }
     throw Exception('Failed to load ' + res.statusCode.toString());
+  }
+
+  @override
+  Future<List<UserItems>> searchSomething(String searchResult) {
+    // TODO: implement searchSomething
+    throw UnimplementedError();
   }
 }
