@@ -4,7 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../bloc/users_bloc/users_bloc.dart';
+import '../widgets/bottom_loader.dart';
+import '../widgets/null_widget.dart';
+import '../widgets/users_list_widget.dart';
 import 'users_home_body.dart';
+import 'users_list.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -15,20 +19,22 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   @override
-  void initState() {
-    super.initState();
-  }
-
   dynamic selectedValue = 1;
   String searchResult = "";
   TextEditingController searchController = TextEditingController();
-  final ScrollController scrollController =
-      ScrollController(initialScrollOffset: 50.0);
+  ScrollController _scrollController = ScrollController();
+  late UsersBloc _usersBloc;
+
+  void initState() {
+    super.initState();
+    _usersBloc = context.read<UsersBloc>();
+    _scrollController.addListener(_onScroll);
+  }
 
   @override
   Widget build(BuildContext context) {
-    //final _usersBloc = BlocProvider.of<UsersBloc>(context);
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: SizedBox(
         width: MediaQuery.of(context).size.width,
         child: CustomScrollView(
@@ -198,14 +204,30 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            SliverToBoxAdapter(
-              child: UsersHomeBody(
-                //searchResult: searchResult,
-              ),
+            SliverFillRemaining(
+              child:  UsersHomeBody(),
             ),
           ],
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onRefresh() async {
+    _usersBloc.add(UsersRefresh());
+  }
+
+  void _onScroll() {
+    double maxScroll = _scrollController.position.maxScrollExtent;
+    double currentScroll = _scrollController.position.pixels;
+    if (currentScroll == maxScroll) {
+      _usersBloc.add(UsersFetched());
+    }
   }
 }

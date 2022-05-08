@@ -8,10 +8,12 @@ class UsersItemWidget extends StatelessWidget {
     required this.urlProfile,
     required this.avatar,
     required this.username,
+    required this.index,
   }) : super(key: key);
   final String urlProfile;
   final String avatar;
   final String username;
+   final int index;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -35,7 +37,7 @@ class UsersItemWidget extends StatelessWidget {
               child: Image.network(avatar)),
         ),
         title: Text(
-          username,
+          index.toString()+ " "+username,
           maxLines: 1,
           style: TextStyle(
             fontSize: ScreenUtil().setSp(18),

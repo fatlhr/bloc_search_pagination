@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'bloc/issues_bloc/issues_bloc.dart';
+import 'bloc/repo_bloc/repo_bloc.dart';
 import 'bloc/users_bloc/users_bloc.dart';
 import 'ui/pages/homepage.dart';
 
@@ -31,10 +33,18 @@ class MyApp extends StatelessWidget {
             Theme.of(context).textTheme,
           ),
         ),
-        home: BlocProvider(
-          create: (context) {
-            return UsersBloc()..add(UsersFetched());
-          },
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (context) => UsersBloc()..add(UsersFetched()),
+            ),
+            BlocProvider(
+              create: (context) => RepoBloc(),
+            ),
+            BlocProvider(
+              create: (context) => IssuesBloc(),
+            ),
+          ],
           child: const HomePage(),
         ),
       ),

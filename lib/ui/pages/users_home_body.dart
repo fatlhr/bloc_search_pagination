@@ -17,17 +17,14 @@ class UsersHomeBody extends StatefulWidget {
 }
 
 class _UsersHomeBodyState extends State<UsersHomeBody> {
-  final ScrollController scrollController =
-      ScrollController(initialScrollOffset: 50.0);
+  final ScrollController _scrollController = ScrollController();
   late UsersBloc _usersBloc;
 
   @override
   void initState() {
     super.initState();
-    //_usersBloc = context.read<UsersBloc>();
-    _usersBloc = BlocProvider.of<UsersBloc>(context);
-    //_usersBloc.add(UsersFetched(widget.searchResult));
-    scrollController.addListener(_onScroll);
+    _usersBloc = context.read<UsersBloc>();
+    _scrollController.addListener(_onScroll);
   }
 
   @override
@@ -43,16 +40,16 @@ class _UsersHomeBodyState extends State<UsersHomeBody> {
               child: Text('Search Something...'),
             ),
           );
-        } else if (state is UsersLoaded) {
+        }
+        if (state is UsersLoaded) {
           if (state.users.isEmpty) {
             return const NullWidget();
           }
-          //print(widget.searchResult);
           return RefreshIndicator(
             onRefresh: _onRefresh,
             child: UsersList(
               state: state,
-              scrollController: scrollController,
+              scrollController: _scrollController,
             ),
           );
         }
@@ -65,7 +62,7 @@ class _UsersHomeBodyState extends State<UsersHomeBody> {
 
   @override
   void dispose() {
-    scrollController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -74,12 +71,10 @@ class _UsersHomeBodyState extends State<UsersHomeBody> {
   }
 
   void _onScroll() {
-    double maxScroll = scrollController.position.maxScrollExtent;
-    double currentScroll = scrollController.position.pixels;
+    double maxScroll = _scrollController.position.maxScrollExtent;
+    double currentScroll = _scrollController.position.pixels;
     if (currentScroll == maxScroll) {
-      _usersBloc.add(UsersFetched(
-        //widget.searchResult
-        ));
+      _usersBloc.add(UsersFetched());
     }
   }
 }

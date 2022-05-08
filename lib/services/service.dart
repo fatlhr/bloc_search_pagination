@@ -4,17 +4,12 @@ import 'dart:convert';
 import '../models/issues_model.dart';
 import '../models/repo_model.dart';
 import '../models/user_model.dart';
-import '../utils/api.dart';
 
-abstract class SearchResult {
-  Future<List<UserItems>> searchSomething(String searchResult);
-}
-
-class Service extends SearchResult {
+class Service {
   static Future<List<UserItems>> getUsers(
       String input, int page, int perPage) async {
     String url =
-        Api.api+"/search/users?q=$input&page=page&per_page=$perPage";
+        "https://api.github.com/search/users?q=$input&page=page&per_page=$perPage";
 
     var res = await http.get(Uri.parse(url));
     if (res.statusCode == 200) {
@@ -65,11 +60,5 @@ class Service extends SearchResult {
           .then((value) => searchIssues);
     }
     throw Exception('Failed to load ' + res.statusCode.toString());
-  }
-
-  @override
-  Future<List<UserItems>> searchSomething(String searchResult) {
-    // TODO: implement searchSomething
-    throw UnimplementedError();
   }
 }

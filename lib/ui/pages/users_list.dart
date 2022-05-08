@@ -20,16 +20,19 @@ class UsersList extends StatelessWidget {
       shrinkWrap: true,
       controller: scrollController,
       itemCount:
-          (state.hasReachedMax) ? state.users.length : state.users.length + 1,
+          state.hasReachedMax ? state.users.length : state.users.length + 1,
       separatorBuilder: (BuildContext context, int index) {
         return const Divider(thickness: 1);
       },
       itemBuilder: (context, index) {
-        return index < state.users.length ? UsersItemWidget(
+        if (index >= state.users.length) return BottomLoader();
+        print(state.users.length);
+        return UsersItemWidget(
           avatar: state.users[index].avatarUrl,
           urlProfile: state.users[index].htmlUrl,
           username: state.users[index].login,
-        ): const BottomLoader();
+          index: index + 1,
+        );
       },
     );
   }

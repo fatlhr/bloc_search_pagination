@@ -25,8 +25,11 @@ class UsersLoaded extends UsersState {
     this.hasReachedMax = false,
   });
 
-  UsersLoaded copyWith(
-      {List<UserItems>? users, bool? hasReachedMax, String? searchResult}) {
+  UsersLoaded copyWith({
+    List<UserItems>? users,
+    bool? hasReachedMax,
+    String? searchResult,
+  }) {
     return UsersLoaded(
       users: users ?? this.users,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,

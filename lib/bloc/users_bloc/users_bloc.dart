@@ -13,44 +13,28 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
   @override
   Stream<UsersState> mapEventToState(UsersEvent event) async* {
     if (event is UsersFetched) {
-      //String searchResult = event.searchResult;
       yield await _mapUsersToState(state);
-      // yield UsersUnInitialized();
-      // try {
-      //   UsersLoaded usersLoaded = state as UsersLoaded;
-      //   List<UserItems> userItems =
-      //       await Service.getUsers(event.searchResult, 0, 10);
-      //   yield userItems.isEmpty
-      //       ? usersLoaded.copyWith(hasReachedMax: true)
-      //       : usersLoaded.users.length < 10
-      //           ? usersLoaded.copyWith(hasReachedMax: true)
-      //           : usersLoaded.copyWith(users: usersLoaded.users + userItems);
-      //  // UsersLoaded(users: userItems);
-      // } catch (e) {}
-    } else if (event is UsersRefresh) {
+    }
+    if (event is UsersRefresh) {
       yield UsersInitial();
+
       yield await _mapUsersToState(state);
     }
   }
 
-  Future<UsersState> _mapUsersToState(UsersState state) async { 
+  Future<UsersState> _mapUsersToState(UsersState state) async {
     List<UserItems> users;
+
     try {
       if (state is UsersInitial) {
-        users = await Service.getUsers('flutter', 0, 5);
-        return UsersLoaded(
-          users: users,
-        );
+        users = await Service.getUsers('flutter', 0, 10);
+        return UsersLoaded(users: users);
       }
-
-      UsersLoaded usersLoaded = state as UsersLoaded;
-      users = await Service.getUsers('flutter', usersLoaded.users.length, 5);
-
+      UsersLoaded postLoaded = state as UsersLoaded;
+      users = await Service.getUsers('flutter', postLoaded.users.length, 10);
       return users.isEmpty
-          ? usersLoaded.copyWith(hasReachedMax: true)
-          // : usersLoaded.users.length < 5
-          //     ? usersLoaded.copyWith(hasReachedMax: true)
-              : usersLoaded.copyWith(users: usersLoaded.users + users);
+          ? postLoaded.copyWith(hasReachedMax: true)
+          : postLoaded.copyWith(users: postLoaded.users + users);
     } on Exception {
       return UsersError();
     }
