@@ -20,28 +20,37 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
   }
 
   Future<UsersState> _mapUsersToState(
-      UsersState state, String searchResult) async {
-    List<UserItems> users;
+    UsersState state,
+    String searchResult,
+  ) async {
     try {
-      if (searchResult == '') {
-        if (state is UsersInitial) {
+      if (state is UsersInitial) {
+        final users = await Service.getUsers(searchResult, 1, 10);
+        if (users == null) {
           return UsersInitial();
         }
+        var totalPages = users.totalCount ~/ 10;
+        return UsersLoaded(
+          users: users.items,
+          hasReachedMax: totalPages <= 1,
+          currentPage: 1,
+          perPage: 10,
+        );
       }
-
-      if (searchResult != '') {
-        users = await Service.getUsers(searchResult, 0, 10);
-        return UsersLoaded(users: users);
+      UsersLoaded usersloaded = state as UsersLoaded;
+      final users = await Service.getUsers(
+          searchResult, usersloaded.currentPage + 1, usersloaded.perPage);
+      if (users == null) {
+        return UsersInitial();
       }
-      
-          
-      UsersLoaded usersLoaded = state as UsersLoaded;
-      users = await Service.getUsers(
-          searchResult, usersLoaded.users.length, 10);
-
-      return users.isEmpty
-          ? usersLoaded.copyWith(hasReachedMax: true)
-          : usersLoaded.copyWith(users: usersLoaded.users + users);
+      var totalPages = users.totalCount ~/ usersloaded.perPage;
+      return UsersLoaded(
+        users: usersloaded.users + users.items,
+        hasReachedMax: totalPages <= usersloaded.currentPage + 1,
+        totalPages: totalPages,
+        currentPage: usersloaded.currentPage + 1,
+        perPage: usersloaded.perPage,
+      );
     } on Exception {
       return UsersError();
     }

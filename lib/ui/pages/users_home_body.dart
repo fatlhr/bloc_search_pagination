@@ -35,10 +35,18 @@ class _UsersHomeBodyState extends State<UsersHomeBody> {
           return SizedBox(
             height: MediaQuery.of(context).size.height,
             child: const Center(
-              child: Text('Search Something...'),
+              child: Text('mau cari apa hayoo...'),
             ),
           );
         }
+        // if (state is UsersLoading) {
+        //   return SizedBox(
+        //     height: MediaQuery.of(context).size.height,
+        //     child: const Center(
+        //       child: CircularProgressIndicator(),
+        //     ),
+        //   );
+        // }
         if (state is UsersLoaded) {
           if (state.users.isEmpty) {
             return const NullWidget();
@@ -72,9 +80,7 @@ class _UsersHomeBodyState extends State<UsersHomeBody> {
     double maxScroll = _scrollController.position.maxScrollExtent;
     double currentScroll = _scrollController.position.pixels;
     if (currentScroll == maxScroll) {
-      _usersBloc.add(UsersFetched(
-        widget.searchResult)
-        );
+      _usersBloc.add(UsersFetched(widget.searchResult));
     }
   }
 }

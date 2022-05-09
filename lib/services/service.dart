@@ -4,32 +4,29 @@ import 'dart:convert';
 import '../models/issues_model.dart';
 import '../models/repo_model.dart';
 import '../models/user_model.dart';
+import '../utils/api.dart';
 
 class Service {
-  static Future<List<UserItems>> getUsers(
-      String input, int page, int perPage) async {
+  static Future<UserModel?> getUsers(
+    String input,
+    int page,
+    int perPage,
+  ) async {
     String url =
-        "https://api.github.com/search/users?q=$input&page=page&per_page=$perPage";
+        Api.api + "/search/users?q=$input&page=$page&per_page=$perPage";
 
     var res = await http.get(Uri.parse(url));
     if (res.statusCode == 200) {
-      var data = (jsonDecode(res.body))['items'] as List;
-      var searchUser = List<UserItems>.from(
-        data.map(
-          (item) => UserItems.fromJson(item),
-        ),
-      );
-      //print(searchUser[0].);
-      return searchUser;
-    } else if (res.statusCode == 403) {
-      throw Exception('403 Forbidden');
+      var dataModels = UserModel.fromJson(json.decode(res.body));
+
+      return dataModels;
+    } else {
+      return null;
     }
-    throw Exception('Failed to load ' + res.statusCode.toString());
   }
 
   static Future<List<RepoItems>> getRepo(
       String input, int page, int perPage) async {
-    //String url = "https://api.github.com/search/repositories?q=$input";
     String url =
         "https://api.github.com/search/repositories?q=$input&page=page&per_page=$perPage";
 
@@ -47,7 +44,6 @@ class Service {
 
   static Future<List<IssuesItems>> getIssues(
       String input, int page, int perPage) async {
-    //String url = "https://api.github.com/search/issues?q=$input";
     String url =
         "https://api.github.com/search/issues?q=$input&page=page&per_page=$perPage";
     var res = await http.get(Uri.parse(url));
