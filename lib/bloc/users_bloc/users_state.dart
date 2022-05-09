@@ -7,14 +7,20 @@ abstract class UsersState extends Equatable {
   List<Object> get props => [];
 }
 
-class UsersInitial extends UsersState {}
+class UsersInitial extends UsersState {
+  @override
+  List<Object> get props => [];
+}
 
 class UsersUnInitialized extends UsersState {
   @override
   List<Object> get props => [];
 }
 
-class UsersError extends UsersState {}
+class UsersError extends UsersState {
+  @override
+  List<Object> get props => [];
+}
 
 class UsersLoaded extends UsersState {
   final List<UserItems> users;

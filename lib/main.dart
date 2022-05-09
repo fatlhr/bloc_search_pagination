@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
         home: MultiBlocProvider(
           providers: [
             BlocProvider(
-              create: (context) => UsersBloc()..add(UsersFetched()),
+              create: (context) => UsersBloc(),
             ),
             BlocProvider(
               create: (context) => RepoBloc(),

@@ -22,17 +22,18 @@ class _HomePageState extends State<HomePage> {
   dynamic selectedValue = 1;
   String searchResult = "";
   TextEditingController searchController = TextEditingController();
-  ScrollController _scrollController = ScrollController();
   late UsersBloc _usersBloc;
 
+  @override
   void initState() {
     super.initState();
     _usersBloc = context.read<UsersBloc>();
-    _scrollController.addListener(_onScroll);
+    _usersBloc.add(UsersFetched(''));
   }
 
   @override
   Widget build(BuildContext context) {
+    //_usersBloc = context.read<UsersBloc>();
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: SizedBox(
@@ -50,11 +51,9 @@ class _HomePageState extends State<HomePage> {
                   hintText: 'sejutacita',
                   suffixIcon: IconButton(
                     onPressed: () {
-                      setState(() {
-                        searchResult = searchController.text;
-                        print(searchResult);
-                        //_usersBloc.add(UsersFetched(searchResult));
-                      });
+                      searchResult = searchController.text;
+                      _usersBloc.add(UsersFetched(searchResult));
+                      print(searchResult);
                     },
                     icon: Icon(Icons.search, color: Colors.grey),
                   ),
@@ -205,29 +204,11 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             SliverFillRemaining(
-              child:  UsersHomeBody(),
+              child: UsersHomeBody(searchResult: searchResult),
             ),
           ],
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _onRefresh() async {
-    _usersBloc.add(UsersRefresh());
-  }
-
-  void _onScroll() {
-    double maxScroll = _scrollController.position.maxScrollExtent;
-    double currentScroll = _scrollController.position.pixels;
-    if (currentScroll == maxScroll) {
-      _usersBloc.add(UsersFetched());
-    }
   }
 }

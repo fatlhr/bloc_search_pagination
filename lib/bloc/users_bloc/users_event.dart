@@ -8,8 +8,8 @@ abstract class UsersEvent extends Equatable {
 }
 
 class UsersFetched extends UsersEvent {
-  // final String searchResult;
-  // const UsersFetched(this.searchResult);
+  String searchResult;
+  UsersFetched(this.searchResult);
 }
 
 class UsersRefresh extends UsersEvent {}

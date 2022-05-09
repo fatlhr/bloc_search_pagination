@@ -31,7 +31,7 @@ dependencies:
   equatable: ^2.0.3
   flutter:
     sdk: flutter
-  flutter_bloc: ^7.1.0
+  flutter_bloc: ^8.0.1
   flutter_screenutil: ^5.4.0+1
   google_fonts: ^2.3.2
   url_launcher: ^6.1.0

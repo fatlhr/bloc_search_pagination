@@ -8,10 +8,10 @@ import 'users_list.dart';
 class UsersHomeBody extends StatefulWidget {
   const UsersHomeBody({
     Key? key,
-    //required this.searchResult,
+    required this.searchResult,
   }) : super(key: key);
 
-  //final String searchResult;
+  final String searchResult;
   @override
   State<UsersHomeBody> createState() => _UsersHomeBodyState();
 }
@@ -29,8 +29,6 @@ class _UsersHomeBodyState extends State<UsersHomeBody> {
 
   @override
   Widget build(BuildContext context) {
-    // _usersBloc = BlocProvider.of<UsersBloc>(context);
-    // scrollController.addListener(_onScroll);
     return BlocBuilder<UsersBloc, UsersState>(
       builder: (context, state) {
         if (state is UsersInitial) {
@@ -74,7 +72,9 @@ class _UsersHomeBodyState extends State<UsersHomeBody> {
     double maxScroll = _scrollController.position.maxScrollExtent;
     double currentScroll = _scrollController.position.pixels;
     if (currentScroll == maxScroll) {
-      _usersBloc.add(UsersFetched());
+      _usersBloc.add(UsersFetched(
+        widget.searchResult)
+        );
     }
   }
 }
